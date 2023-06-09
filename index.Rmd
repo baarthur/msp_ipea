@@ -624,27 +624,30 @@ read_rds(here("data/rds/mapa_inaug.RDS")) +
 # Considerações finais
 
 .pull-left[
-### Metrô implica prêmio de mercado
+### Evidência para o prêmio de mercado
 
-* Próximo passo: avaliar o potencial de métodos compartilhados de financiamento
-  + Operações Urbanas Consorciadas
+* Possibilidades: avaliar o potencial de métodos compartilhados de financiamento
+  + Operações Urbanas Consorciadas (**OUC**): experiência limitada para financiar transporte
   + *Transit Oriented Development*
   + *Land Readjustment*
 
+
 * Por outro lado: 
-  + Pode refletir estoque imobiliário incapaz de acompanhar a demanda
-  + Avaliar os custos e benefícios sociais dos limites construtivos
+  + Pode refletir estoque imobiliário incapaz de acompanhar a **demanda**.
+  + Avaliar os custos e benefícios sociais dos **limites** construtivos.
+  + Limitação do estudo: corte transversal não abre margem para inferir **causalidade**.
 ]
 
 .pull-right[
 ### Índice captura vantagem locacional
 
-* Permite flexibilizar a teoria
-  
-### As duas variáveis podem coexistir
+* Modelagem mais **realista**
 
-* Mesmo com o índice, o metrô se mantém significativo
-* Existe um diferencial de mercado para além da acessibilidade
+* **Flexibilizar** premissa de emprego atomizado
+
+* Mesmo com o índice, o metrô se mantém significativo. As variáveis podem **coexistir**?
+
+* Existe um diferencial de mercado no **metrô** para além da acessibilidade?
 ]
 
 
