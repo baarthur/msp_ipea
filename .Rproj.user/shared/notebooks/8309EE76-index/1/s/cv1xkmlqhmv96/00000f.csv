@@ -1,0 +1,5 @@
+"0","mapa_resid <- read_rds(here(""data/rds/mapa_resid.RDS""))"
+"0","mapa_rede <- read_rds(here(""data/rds/mapa_rede.RDS""))"
+"0",""
+"0","mapa_rede +"
+"0","  mapa_resid"

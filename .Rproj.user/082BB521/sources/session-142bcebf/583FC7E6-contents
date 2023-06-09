@@ -1,0 +1,236 @@
+---
+title: "2_descritiva"
+format: html
+---
+
+# Setup
+
+## Carregar pacotes
+```{r}
+#| label: setup
+
+library(kableExtra)
+library(tidyverse)
+library(corrplot)
+library(moments)
+library(ggpubr)
+library(readxl)
+library(here)
+```
+
+## Dados
+```{r}
+df <- read_excel(here("data/df_consolidado.xlsx"))
+
+iso <- read_csv(here("data/iso.csv")) %>% 
+  select(ISO = `alpha-3`, region, subregion = `sub-region`)
+
+df <- df %>% 
+  left_join(iso)
+
+remove(iso)
+```
+
+## Estatísticas gerais
+```{r}
+df_stat <- df %>% 
+  summarise(
+    across(
+      .cols = c(gni_pc, nota_geral:regula, fbkf, agr, urban, le, mys),
+      .fns = list(media = mean, mediana = median, min = min, max = max, 
+           desvio = sd, enviesamento = skewness, curtose = kurtosis),
+      .names = "{.col}-{.fn}"
+    ) 
+  ) %>% 
+  pivot_longer(cols = everything(), 
+       names_to = c("variavel", ".value"), names_sep="-") %>% 
+  mutate_if(is.numeric, funs(as.numeric(signif(., 4))))
+
+df_stat %>%
+  kbl(
+    format = "html",
+    digits = 2,
+    align = "c",
+    format.args = list(big.mark = ".", decimal.mark = ","),
+    col.names = c("Variável","Média", "Mediana", "Mín.", "Máx.", "Desvio", "Assimetria", "Curtose")
+  ) %>% 
+  kable_classic() #%>% 
+  #write_file(here("output/descritivas.html"))
+```
+
+
+
+
+# Gráficos
+
+## Automatizando
+
+Premissas
+```{r}
+#| label: premissas
+
+alpha <- 0.75
+brewer <- "Pastel2"
+names <- tibble(
+  var = colnames(df),
+  nome = c(
+    "Ano", "País", "Código ISO", 
+    "Nota geral", "Tamanho do governo", "Sistema Legal", 
+    "Dinheiro sólido", "Liberdade Comercial", "Regulações",
+    "FBKF (% PIB)", "Agricultura (% PIB)", "Indústria (% PIB)", "PIB per capita", "População urbana (%)", 
+    "IDH", "Expectativa de vida", "Escolaridade mediana", "PNB per capita", "Região", "Subregião"
+  )
+) %>% 
+  pivot_wider(names_from = var, values_from = nome)
+```
+
+Função
+```{r}
+#| label: gg_marina
+
+gg_marina <- function(data, x, y, z, alpha = 0.75, size = 0.5, palette = "Pastel2", smooth = T) {
+  if(smooth) {
+    corr <- cor(
+    data %>% select({{x}}) %>% as_vector(),
+    data %>% select({{y}}) %>% as_vector() %>% log(),
+  ) %>% 
+    round(2)
+    
+    ggplot(data, aes({{x}}, log({{y}}))) +
+      geom_point(
+        aes(color = {{z}}),
+        alpha = alpha, 
+        size = size
+      ) +
+      geom_smooth(method = "lm", se = F, size = size) +
+      scale_color_brewer(palette = {{palette}}) +
+      labs(
+        caption = paste0("Correlação: ",corr),
+        color = names %>% select({{z}}),
+        x = names %>% select({{x}}),
+        y = paste0(names %>% select({{y}}), ", log")
+      ) +
+      guides(color = guide_legend(override.aes = list(size = size + 1))) +
+      theme_bw()
+  } else {
+    ggplot(data, aes({{x}}, {{y}})) +
+      geom_point(
+        aes(color = {{z}}),
+        alpha = alpha, 
+        size = size
+      ) +
+      scale_color_brewer(palette = {{palette}}) +
+      labs(
+        caption = paste0("Correlação: ",corr),
+        color = names %>% select({{z}}),
+        x = names %>% select({{x}}),
+        y = paste0(names %>% select({{y}}), ", log")
+      ) +
+      guides(color = guide_legend(override.aes = list(size = size + 1))) +
+      theme_bw()
+  }
+}
+```
+
+## EFW
+```{r}
+#| label: efw
+
+# Nota geral
+p_ng <- df %>% 
+  gg_marina(nota_geral, gni_pc, region, size = 0.25)
+
+# Governo
+p_gov <- df %>% 
+  gg_marina(governo, gni_pc, region, size = 0.25)
+
+# Legal
+p_leg <- df %>% 
+  gg_marina(legal, gni_pc, region, size = 0.25)
+
+# Dinheiro
+p_din <- df %>% 
+  gg_marina(dinheiro, gni_pc, region, size = 0.25)
+
+# Comercial
+p_com <- df %>% 
+  gg_marina(comercial, gni_pc, region, size = 0.25)
+
+# Regula
+p_reg <- df %>% 
+  gg_marina(regula, gni_pc, region, size = 0.25)
+
+# Combinar
+ggarrange(
+  p_ng, p_gov + rremove("ylab"), p_leg + rremove("ylab"), 
+  p_din, p_com + rremove("ylab"), p_reg + rremove("ylab"), 
+  ncol = 3, nrow = 2,
+  legend = "bottom", common.legend = T
+)
+```
+
+## Controles
+```{r}
+# FBKF
+p_kf <- df %>% 
+  gg_marina(fbkf, gni_pc, region, size = 0.25)
+
+# Agro
+p_agr <- df %>% 
+  gg_marina(agr, gni_pc, region, size = 0.25)
+
+# Indústria
+p_ind <- df %>% 
+  gg_marina(ind, gni_pc, region, size = 0.25)
+
+# Urbana
+p_urb <- df %>% 
+  gg_marina(urban, gni_pc, region, size = 0.25)
+
+# Expectativa
+p_le <- df %>% 
+  gg_marina(le, gni_pc, region, size = 0.25)
+
+# Escolaridade
+p_mys <- df %>% 
+  gg_marina(mys, gni_pc, region, size = 0.25)
+
+# Combinar
+ggarrange(
+  p_kf, p_agr + rremove("ylab"), p_ind + rremove("ylab"), 
+  p_urb, p_le + rremove("ylab"), p_mys + rremove("ylab"), 
+  ncol = 3, nrow = 2,
+  legend = "bottom", common.legend = T
+)
+```
+
+# Correlogramas
+
+```{r}
+cor1 <- df %>% 
+  select(nota_geral:agr, urban, le:gni_pc) %>% 
+  cor()
+corrplot(cor1, type = "lower", method = "square")
+
+cor2 <- df %>% 
+  select(nota_geral:regula, gni_pc) %>% 
+  cor()
+corrplot(cor2, type = "lower", method = "number")
+
+cor3 <- df %>% 
+  select(fbkf:mys) %>% 
+  cor()
+corrplot(cor3, type = "lower", method = "number")
+```
+
+```{r}
+diag <- matrix(0, nrow = nrow(cor1), ncol = ncol(cor1))
+diag[lower.tri(diag)] <- cor1[lower.tri(cor1)]
+rownames(diag) <- rownames(cor1)
+colnames(diag) <- colnames(cor1)
+
+kable(diag, digits = 2) %>% 
+  kable_classic() %>% 
+  write_file(here("output/corr.html"))
+```
+
