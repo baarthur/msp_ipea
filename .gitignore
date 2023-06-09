@@ -1,0 +1,14 @@
+#Files to ignore
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+.shp
+.shx
+.prj
+.dbf
+.DBF
+.cpg
+
+

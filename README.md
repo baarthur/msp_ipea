@@ -1,9 +1,7 @@
 # Mercado imobiliário e infraestrutura de transporte:
 **Qual o prêmio de mercado do metrô?**
 
-XX Enaber | Salvador (BA), set/2022
-
-50º Encontro Nacional de Economia | Fortaleza (CE), dez/2022
+Seminário DIRUR/Ipea, jun/2023
 
 ## Conteúdo
 
